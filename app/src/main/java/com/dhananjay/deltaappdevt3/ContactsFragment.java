@@ -3,6 +3,7 @@ package com.dhananjay.deltaappdevt3;
 
 import android.app.Fragment;
 import android.app.LoaderManager;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.CursorLoader;
 import android.database.Cursor;
@@ -16,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 public class ContactsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,AdapterView.OnItemClickListener{
 
@@ -23,7 +25,6 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
 
     ListView listView;
     SimpleCursorAdapter cursorAdapter;
-    String TAG="lol";
     String[] PROJECTION={
             ContactsContract.Contacts.DISPLAY_NAME_PRIMARY,
             ContactsContract.Contacts._ID};
@@ -61,8 +62,10 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
         String contactID=cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
         Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI,new Long(contactID));
         Uri photoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.DISPLAY_PHOTO);
+        ContentResolver cr = getActivity().getContentResolver();
+
         Cursor cursorPhone = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER},
-                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ? AND " + ContactsContract.CommonDataKinds.Phone.TYPE + " = " + ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE, new String[]{contactID},null);
+                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ? ", new String[]{contactID},null);
         if (cursorPhone.moveToFirst()) {
             contactNumber = cursorPhone.getString(cursorPhone.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
         }
@@ -80,6 +83,7 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
         else {
             contactEmail="Not Found";
         }
+
             cursorPhone.close();
             bundle = new Bundle();
             bundle.putString("contactName", contactName);
